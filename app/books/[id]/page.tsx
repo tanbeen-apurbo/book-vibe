@@ -1,9 +1,13 @@
 import React from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { IBook } from "@/app/types/books.types";
+import fs from "fs/promises";
+import path from "path";
+
+import type { IBook } from "@/app/types/books.types";
 import ReadButton from "@/app/components/shared/bookDetails/ReadButton";
 import WhishlistButton from "@/app/components/shared/bookDetails/WhishListButton";
+
 interface IBooksDetailsPageProps {
   params: Promise<{
     id: string;
@@ -11,10 +15,15 @@ interface IBooksDetailsPageProps {
 }
 
 const getBooks = async (): Promise<IBook[]> => {
-  const res = await fetch("http://localhost:3000/booksData.json");
-  const data = await res.json();
+  const filePath = path.join(
+    process.cwd(),
+    "public",
+    "booksData.json"
+  );
 
-  return data;
+  const file = await fs.readFile(filePath, "utf-8");
+
+  return JSON.parse(file) as IBook[];
 };
 
 const BooksDetailsPage = async ({
@@ -25,14 +34,16 @@ const BooksDetailsPage = async ({
   const booksData = await getBooks();
 
   const book = booksData.find(
-    (book) => book.bookId === parseInt(id)
+    (book) => book.bookId === Number(id)
   );
 
   if (!book) {
     return (
       <div className="container mx-auto my-[70px] px-4">
         <div className="rounded-3xl border border-base-300 bg-base-100 p-10 text-center shadow-lg">
-          <h2 className="text-3xl font-bold">Book Not Found</h2>
+          <h2 className="text-3xl font-bold">
+            Book Not Found
+          </h2>
 
           <p className="mt-3 text-base-content/60">
             Sorry, we couldn't find the book you're looking for.
@@ -61,11 +72,10 @@ const BooksDetailsPage = async ({
       </Link>
 
       {/* Main Card */}
-      <div className="card lg:card-side overflow-hidden rounded-3xl border border-base-300 bg-base-100 shadow-xl">
+      <div className="card overflow-hidden rounded-3xl border border-base-300 bg-base-100 shadow-xl lg:card-side">
 
         {/* Book Image */}
         <figure className="relative flex min-h-[450px] items-center justify-center bg-gradient-to-br from-primary/10 via-base-200 to-secondary/10 p-8 md:p-12 lg:w-[40%]">
-
           <div className="relative overflow-hidden rounded-2xl shadow-2xl transition duration-500 hover:-translate-y-2 hover:shadow-primary/20">
             <Image
               src={book.image}
@@ -76,7 +86,6 @@ const BooksDetailsPage = async ({
               priority
             />
           </div>
-
         </figure>
 
         {/* Details */}
@@ -84,7 +93,6 @@ const BooksDetailsPage = async ({
 
           {/* Category + Rating */}
           <div className="flex flex-wrap items-center gap-3">
-
             <span className="badge badge-primary badge-lg px-4">
               {book.category}
             </span>
@@ -92,7 +100,6 @@ const BooksDetailsPage = async ({
             <span className="badge badge-warning badge-lg px-4">
               ★ {book.rating}
             </span>
-
           </div>
 
           {/* Book Name */}
@@ -115,6 +122,7 @@ const BooksDetailsPage = async ({
               <p className="text-xs uppercase tracking-wider text-base-content/50">
                 Pages
               </p>
+
               <p className="mt-1 text-xl font-bold">
                 {book.totalPages}
               </p>
@@ -124,6 +132,7 @@ const BooksDetailsPage = async ({
               <p className="text-xs uppercase tracking-wider text-base-content/50">
                 Published
               </p>
+
               <p className="mt-1 text-xl font-bold">
                 {book.yearOfPublishing}
               </p>
@@ -133,6 +142,7 @@ const BooksDetailsPage = async ({
               <p className="text-xs uppercase tracking-wider text-base-content/50">
                 Rating
               </p>
+
               <p className="mt-1 text-xl font-bold">
                 {book.rating}/5
               </p>
@@ -177,13 +187,10 @@ const BooksDetailsPage = async ({
 
           {/* Buttons */}
           <div className="card-actions mt-8 flex-wrap">
+            <ReadButton book={book} />
 
-            <ReadButton book={book}></ReadButton>
-
-           <WhishlistButton book={book}></WhishlistButton>
-
+            <WhishlistButton book={book} />
           </div>
-
         </div>
       </div>
 
@@ -203,9 +210,7 @@ const BooksDetailsPage = async ({
         <p className="max-w-5xl text-base leading-8 text-base-content/70">
           {book.review}
         </p>
-
       </div>
-
     </div>
   );
 };
