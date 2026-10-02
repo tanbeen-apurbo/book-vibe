@@ -3,7 +3,7 @@ import BookCard from '../BookCard';
 import type { IBook } from '../../../types/books.types';
 
 const getBooks = async () => {
-    const res = await fetch('http://localhost:3000/booksData.json');
+    const res = await fetch(`${process.env.NEXT_PUBLIC_SERVER_URL}/booksData.json`);
     const data = await res.json();
 
     return data;
